@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Emolingo</title>
+<style>
+:root{
+  --bg1:#0b1a14;--bg2:#13261d;--bg3:#1c2b24;
+  --green:#22c55e;--green-d:#15803d;--green-l:#86efac;
+  --text:#e8f5ee;--muted:#9bb5a6;--line:rgba(134,239,172,.25);
+  color-scheme:dark;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:linear-gradient(160deg,var(--bg1),var(--bg2) 50%,var(--bg3)) fixed}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:12px 20px;background:linear-gradient(90deg,var(--green-d),var(--green));color:#05210f;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+header h1{margin:0;font-size:1.15rem;flex:1;white-space:nowrap}
+nav{display:flex;gap:6px}
+.tab{background:none;border:0;color:#05210f;font:inherit;font-weight:700;font-size:.9rem;padding:8px 16px;border-radius:999px;cursor:pointer;opacity:.75;transition:background .25s,opacity .25s}
+.tab.on{background:rgba(5,33,15,.85);color:var(--green-l);opacity:1}
+main{max-width:1000px;margin:0 auto;padding:28px 20px 80px}
+.hero{text-align:center;margin-bottom:22px}
+.hero h2{margin:0 0 6px;font-size:1.6rem;color:var(--green-l)}
+.hero p{margin:0;color:var(--muted)}
+.search{display:flex;max-width:520px;margin:18px auto 14px;border:1.5px solid var(--green);border-radius:999px;
+  background:rgba(0,0,0,.3);padding:4px 16px;align-items:center;gap:8px}
+.search input{flex:1;background:none;border:0;outline:0;color:var(--text);font-size:1rem;padding:10px 0}
+.pills{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:34px}
+#pills2{margin-bottom:28px}
+.tag.mil{background:#38bdf8}
+.pill{background:none;border:1.5px solid var(--line);color:var(--muted);font:inherit;font-size:.85rem;padding:5px 14px;border-radius:999px;cursor:pointer;transition:all .2s}
+.pill.on{background:var(--green);border-color:var(--green);color:#05210f;font-weight:700}
+.pills.off{visibility:hidden}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,110px);gap:18px;justify-content:center}
+.grid.hidden{display:none}
+.cell{position:relative;width:110px;height:110px}
+.cell.hide{display:none}
+.card{position:absolute;top:0;left:0;width:110px;max-height:110px;overflow:hidden;border-radius:20px;
+  background:rgba(20,40,31,.92);border:1.5px solid var(--line);cursor:pointer;
+  transition:width .38s cubic-bezier(.34,1.3,.5,1),max-height .38s cubic-bezier(.34,1.3,.5,1),border-color .2s,box-shadow .3s}
+.cell.flip .card{left:auto;right:0}
+.cell.open{z-index:10}
+.cell.open .card{width:min(300px,86vw);max-height:380px;border-color:var(--green);box-shadow:0 12px 40px rgba(0,0,0,.55),0 0 0 1px rgba(34,197,94,.3)}
+.top{display:flex;align-items:flex-start;gap:6px;padding:7px}
+.cell.flip .top{flex-direction:row-reverse}
+.ebox{width:96px;height:96px;flex:none;display:flex;align-items:center;justify-content:center;text-align:center}
+.emo{font-size:3.4rem;line-height:1;display:inline-block;user-select:none}
+.term{font-size:1.15rem;font-weight:800;color:var(--green-l);line-height:1.15;display:inline-block;user-select:none;padding:0 4px}
+.cell.open .emo,.cell.open .term{animation:shake .45s ease-in-out infinite}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:translateX(-6px) rotate(-12deg)}75%{transform:translateX(6px) rotate(12deg)}}
+.title{flex:1;overflow:hidden;padding-top:8px;opacity:0;transform:translateX(-8px);transition:opacity .25s .12s,transform .25s .12s;min-width:0}
+.cell.flip .title{transform:translateX(8px);text-align:right}
+.title h3{margin:0;color:var(--green-l);font-size:1rem}
+.title p{margin:3px 0 0;font-size:.75rem;color:var(--muted)}
+.tag{display:inline-block;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--green);color:#05210f;margin-bottom:4px}
+.tag.rl{background:#facc15}
+.detail{padding:0 16px 16px;opacity:0;transform:translateY(8px);transition:opacity .25s .15s,transform .25s .15s;width:min(300px,86vw)}
+.cell.open .title,.cell.open .detail{opacity:1;transform:none}
+.gen{font-size:.86rem;line-height:1.45;margin:8px 0 0;padding-left:10px;border-left:3px solid var(--green)}
+.gen b{color:var(--green-l)}
+.gen.old{border-color:#4b6b5a}
+.cell:not(.open) .card:hover{background:rgba(52,211,110,.38);border-color:var(--green-l)}
+.cell:not(.open) .card:hover .emo,.cell:not(.open) .card:hover .term{animation:pop .4s ease-out}
+.cell:not(.open) .card:hover .term{color:#fff}
+@keyframes pop{0%{transform:scale(1)}10%{transform:scale(1.3)}85%{transform:scale(1.3)}100%{transform:scale(1)}}
+.bit{position:absolute;pointer-events:none;font-size:.9rem;z-index:30}
+.empty{text-align:center;color:var(--muted);display:none;margin-top:30px}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Emolingo</h1>
+  <nav><button class="tab on" data-t="emoji">Emoji</button><button class="tab" data-t="slang">Slang</button></nav>
+</header>
+<main>
+  <div class="hero">
+    <h2>Beda generasi, beda makna</h2>
+    <p>Klik atau ketuk untuk melihat artinya.</p>
+  </div>
+  <div class="search"><span>🔍</span><input id="q" type="search" placeholder="Cari emoji, arti, atau generasi..." autocomplete="off"></div>
+  <div class="pills off" id="pills"><button class="pill on" data-f="">Semua</button><button class="pill" data-f="Internet">Internet</button><button class="pill" data-f="Real life">Real life</button></div>
+  <div class="pills off" id="pills2"><button class="pill on" data-g="">Semua generasi</button><button class="pill" data-g="Milenial">Milenial</button><button class="pill" data-g="Gen Z">Gen Z</button></div>
+  <div class="grid" id="g-emoji"></div>
+  <div class="grid hidden" id="g-slang"></div>
+  <p class="empty" id="empty">Tidak ditemukan.</p>
+</main>
+<footer>Kelompok 6 · Ilmu Komputer UPI · Angkatan 2026</footer>
+<script>
+// [emoji, nama, konteks, Gen Z/Alpha, arti literal]
+const EMOJI=[
+["😂","Face with Tears of Joy","Reaksi terhadap hal lucu","Masih sering dipakai, terutama secara ironis di postingan satire dan meme. Untuk tawa tulus lebih sering 💀 atau 😭.","Wajah tertawa sampai menangis karena sangat lucu."],
+["😹","Cat with Tears of Joy","Tertawa di postingan satir","Tertawa dalam konteks satir atau ragebait, misalnya membalas postingan yang sengaja memancing emosi.","Wajah kucing tertawa sampai menangis."],
+["💀","Skull","Komentar atas lelucon","“Saya mati ketawa”, artinya sangat lucu.","Tengkorak: kematian, bahaya, atau hal menyeramkan."],
+["👍","Thumbs Up","Membalas chat","Terasa dingin, singkat, atau pasif-agresif.","Jempol ke atas: setuju atau oke."],
+["🙂","Slightly Smiling Face","Menutup pesan","Sarkasme atau kesal yang ditahan.","Senyum tipis yang ramah."],
+["😭","Loudly Crying Face","Respons berlebihan","Ketawa sampai nangis atau gemas, tidak harus sedih.","Menangis keras karena sedih."],
+["🔥","Fire","Memuji sesuatu","Keren banget, mantap.","Api: panas atau kebakaran."],
+["🥲","Smiling Face with Tear","Senyum getir","Pura-pura baik-baik saja padahal berat, misalnya “nilai 60 🥲”.","Tersenyum sambil menitikkan air mata: haru atau lega."],
+["🤡","Clown Face","Mengejek orang","Mengejek orang yang bertingkah bodoh atau konyol, kadang untuk mengejek diri sendiri.","Wajah badut: sirkus atau hiburan."],
+["🤓","Nerd Face","Mengejek orang yang sok pintar","Mengejek orang yang dianggap sok pintar atau terlalu serius, sering diikuti “nerd”.","Wajah kutu buku berkacamata dan bergigi besar: pintar atau rajin belajar."],
+["🗿","Moai","Tanggapan datar","Ekspresi datar, cuek, atau gaya dingin.","Patung Moai dari Pulau Paskah."],
+["💅","Nail Polish","Pujian atau sikap slay","Dipakai untuk “slay”: tampil percaya diri dan keren, tidak peduli omongan orang.","Mengecat kuku: perawatan kuku."],
+["😎","Smiling Face with Sunglasses","Sok keren","Dipakai sok keren, sering ironis.","Kacamata hitam: keren atau santai."],
+["😐","Neutral Face","Datar atau kesal","Datar, tidak terkesan, atau kesal tanpa mau bilang.","Wajah datar: biasa saja."],
+];
+// [kata, tag, konteks, Gen Z/Alpha, arti literal]
+const SLANG=[
+["kepo","Real life","Ingin tahu urusan orang","Penasaran berlebihan, populer di era BBM dan Facebook.","Plesetan dari “knowing every particular object”.","Milenial"],
+["galau","Real life","Bimbang atau sedih","Perasaan campur aduk karena cinta, ramai lewat status Facebook dan Twitter.","Kata baku: kacau pikiran, bimbang.","Milenial"],
+["alay","Real life","Gaya berlebihan","Gaya tulisan atau penampilan norak, misalnya huruf campur angka.","Singkatan dari “anak layangan”.","Milenial"],
+["lebay","Real life","Berlebihan","Bereaksi atau bersikap terlalu berlebihan.","Plesetan dari “lebih”.","Milenial"],
+["cupu","Real life","Kuper atau ketinggalan","Ejekan untuk yang dianggap culun atau payah.","Singkatan dari “culun punya”.","Milenial"],
+["gokil","Real life","Luar biasa atau kocak","Pujian untuk hal yang luar biasa atau sangat lucu.","Plesetan dari “gila”.","Milenial"],
+["gaje","Real life","Nggak jelas","Dipakai untuk hal yang absurd atau tidak masuk akal.","Singkatan dari “nggak jelas”.","Milenial"],
+["mager","Real life","Malas gerak","Alasan wajar untuk tidak keluar rumah.","Singkatan dari “malas gerak”.","Milenial"],
+["baper","Real life","Bawa perasaan","Terbawa emosi, sering dipakai bercanda.","Singkatan dari “bawa perasaan”.","Milenial"],
+["php","Internet","Pemberi harapan palsu","Dituduhkan ke orang yang memberi harapan lalu menghilang.","Singkatan dari “pemberi harapan palsu”.","Milenial"],
+["japri","Internet","Chat pribadi","Mengirim pesan langsung, bukan di grup.","Singkatan dari “jalur pribadi”.","Milenial"],
+["gabut","Real life","Tidak ada kegiatan","Kondisi bosan yang biasa, lari ke scroll medsos.","Singkatan dari “gaji buta”.","Gen Z"],
+["gaskeun","Real life","Ayo lakukan","Ajakan semangat: “yuk, langsung gas!”.","Dari kata “gas”: ayo tancap gas.","Gen Z"],
+["santuy","Real life","Santai","Santai dan tidak panik.","Plesetan dari “santai”.","Gen Z"],
+["salting","Real life","Salah tingkah","Canggung manis karena naksir.","Singkatan dari “salah tingkah”.","Gen Z"],
+["bucin","Real life","Budak cinta","Bercanda untuk yang terlalu cinta pasangan.","Singkatan dari “budak cinta”.","Gen Z"],
+["skuy","Real life","Ajakan santai","Ajakan santai: “nongkrong skuy”.","Plesetan dari “kuy” (yuk): ayo.","Gen Z"],
+["gercep","Real life","Gerak cepat","Bertindak sigap dan tidak menunda.","Singkatan dari “gerak cepat”.","Gen Z"],
+["healing","Real life","Menenangkan diri","Jalan-jalan atau me-time untuk pulih dari penat.","Penyembuhan.","Gen Z"],
+["bestie","Real life","Sahabat","Panggilan akrab untuk teman dekat.","Singkatan dari “best friend”.","Gen Z"],
+["ghosting","Real life","Menghilang tanpa kabar","Memutus kontak tiba-tiba tanpa penjelasan.","Menghantui: dari kata “ghost” (hantu).","Gen Z"],
+["spill","Internet","Bocorkan informasi","“Spill dong!” artinya ceritakan atau bagikan.","Tumpah.","Gen Z"],
+["slay","Internet","Pujian tampil keren","Tampil luar biasa dan berani.","Membunuh atau menghabisi.","Gen Z"],
+["sus","Internet","Mencurigakan","Populer lewat game Among Us.","Singkatan dari “suspicious”: mencurigakan.","Gen Z"],
+["no cap","Internet","Serius, tidak bohong","“Beneran”, lawan dari “cap” (bohong).","Tanpa topi.","Gen Z"],
+["flexing","Internet","Pamer","Pamer, sering sambil bercanda atau ironis.","Menekuk atau mengencangkan otot.","Gen Z"],
+["red flag","Internet","Tanda bahaya dalam sifat","Perilaku buruk yang sebaiknya dihindari.","Bendera merah: tanda bahaya.","Gen Z"],
+["fyp","Internet","Beranda TikTok","Beranda rekomendasi video.","Singkatan dari “For You Page”.","Gen Z"],
+["rizz","Internet","Daya tarik","Kemampuan memikat orang saat mendekati gebetan.","Potongan dari kata “charisma”.","Gen Z"],
+["delulu","Internet","Berkhayal","Berkhayal terlalu tinggi, sering dipakai bercanda.","Singkatan dari “delusional”.","Gen Z"],
+["cringe","Internet","Malu melihatnya","Geli atau malu melihat tingkah orang.","Meringis atau bergidik.","Gen Z"],
+["lowkey","Internet","Agak atau diam-diam","“Sebenarnya agak…”, lawan dari “highkey”.","Tidak mencolok.","Gen Z"],
+["glow up","Internet","Berubah jadi lebih baik","Perubahan penampilan atau diri yang jauh lebih baik.","Bersinar naik.","Gen Z"],
+["pov","Internet","Sudut pandang","Awalan caption video yang menaruh penonton di suatu situasi.","Singkatan dari “point of view”.","Gen Z"]
+];
+const $=s=>document.querySelector(s),q=$('#q'),empty=$('#empty'),pills=$('#pills');
+const grids={emoji:$('#g-emoji'),slang:$('#g-slang')};
+let tab='emoji',filt='',gfilt='';
+function build(g,list,isSlang){
+  list.forEach(d=>{
+    const cell=document.createElement('div');cell.className='cell';
+    cell.dataset.s=d.join(' ').toLowerCase();cell.dataset.t=isSlang?d[1]:'';cell.dataset.g=isSlang?d[5]:'';
+    const face=isSlang?`<span class="term">${d[0]}</span>`:`<span class="emo">${d[0]}</span>`;
+    const head=isSlang?`<span class="tag ${d[1]==='Real life'?'rl':''}">${d[1]}</span> <span class="tag ${d[5]==='Milenial'?'mil':''}">${d[5]}</span><h3>${d[0]}</h3>`:`<h3>${d[1]}</h3>`;
+    cell.innerHTML=`<div class="card"><div class="top"><div class="ebox">${face}</div><div class="title">${head}<p>${d[2]}</p></div></div>
+      <div class="detail"><p class="gen"><b>${isSlang?d[5]:'Gen Z/Alpha'}:</b> ${d[3]}</p><p class="gen old"><b>Arti literal:</b> ${d[4]}</p></div></div>`;
+    const sym=isSlang?'💬':d[0];
+    cell.addEventListener('click',()=>{if(cell.classList.contains('open')){cell.classList.remove('open')}else{closeAll();open(cell,sym)}});
+    g.appendChild(cell);
+  });
+}
+function closeAll(){document.querySelectorAll('.cell.open').forEach(c=>c.classList.remove('open'))}
+function open(cell,s){
+  if(cell.classList.contains('open'))return;
+  cell.classList.toggle('flip',cell.getBoundingClientRect().left+300>window.innerWidth-12);
+  cell.classList.add('open');splash(cell,s);
+}
+function splash(cell,s){
+  const r=cell.querySelector('.ebox').getBoundingClientRect(),cr=cell.getBoundingClientRect();
+  const cx=r.left-cr.left+r.width/2,cy=r.top-cr.top+r.height/2;
+  for(let i=0;i<10;i++){
+    const b=document.createElement('span');b.className='bit';b.textContent=s;
+    const sz=22+Math.random()*28;
+    b.style.fontSize=sz+'px';b.style.lineHeight='1';
+    b.style.left=cx-sz/2+'px';b.style.top=cy-sz/2+'px';cell.appendChild(b);
+    const a=(Math.PI*2*i)/10+Math.random()*.5,d=55+Math.random()*50;
+    b.animate([{transform:'translate(0,0) scale(1)',opacity:.8},
+      {transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(.15) rotate(${Math.random()*180}deg)`,opacity:0}],
+      {duration:700+Math.random()*300,easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish=()=>b.remove();
+  }
+}
+function apply(){
+  const k=q.value.trim().toLowerCase();let n=0;
+  for(const t in grids)grids[t].querySelectorAll('.cell').forEach(c=>{
+    const m=c.dataset.s.includes(k)&&(t!=='slang'||((!filt||c.dataset.t===filt)&&(!gfilt||c.dataset.g===gfilt)));
+    c.classList.toggle('hide',!m);if(m&&t===tab)n++;
+  });
+  empty.style.display=n?'none':'block';
+}
+function switchTab(t){
+  if(t===tab)return;
+  closeAll();
+  const from=grids[tab],to=grids[t],dir=t==='slang'?1:-1;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  pills.classList.toggle('off',t!=='slang');$('#pills2').classList.toggle('off',t!=='slang');
+  q.placeholder=t==='slang'?'Cari kata slang, arti, atau generasi...':'Cari emoji, arti, atau generasi...';
+  tab=t;
+  from.animate([{opacity:1,transform:'translateX(0)'},{opacity:0,transform:`translateX(${-40*dir}px)`}],{duration:220,easing:'ease-in'}).onfinish=()=>{
+    from.classList.add('hidden');to.classList.remove('hidden');apply();
+    to.animate([{opacity:0,transform:`translateX(${40*dir}px)`},{opacity:1,transform:'translateX(0)'}],{duration:320,easing:'cubic-bezier(.2,.8,.3,1)'});
+  };
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.t)));
+document.querySelectorAll('.pill').forEach(b=>b.addEventListener('click',()=>{
+  if('g' in b.dataset)gfilt=b.dataset.g;else filt=b.dataset.f;
+  b.parentElement.querySelectorAll('.pill').forEach(x=>x.classList.toggle('on',x===b));apply();
+}));
+q.addEventListener('input',apply);
+build(grids.emoji,EMOJI,false);build(grids.slang,SLANG,true);
+</script>
+</body>
+</html>
